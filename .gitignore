@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Large data files (too big for GitHub)
+data/raw/
+data/processed/
+data/indices/
+data/ml_ready/
+
+# Model weights (large files)
+models/checkpoints/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Anaconda
+*.conda
+
+__pycache__/
+*.pyc
+*.pth
+data/raw/
+data/processed/
+data/ml_ready/
+*.h5
+fix*.py
+write*.py
+.streamlit/

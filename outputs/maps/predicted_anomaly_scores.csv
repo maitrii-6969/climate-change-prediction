@@ -1,0 +1,42 @@
+state,region,score,level,pred_ndvi,clim_ndvi
+Telangana,N. Telangana,0.26,LOW,0.3913,0.4148
+Kerala,Kerala,0.21,LOW,0.7705,0.7783
+Rajasthan,E. Rajasthan,0.2,LOW,0.263,0.2762
+Maharashtra,Konkan,0.19,LOW,0.7058,0.7194
+Maharashtra,Marathwada,0.18,LOW,0.3548,0.374
+Jharkhand,Jharkhand,0.16,LOW,0.5519,0.5688
+Haryana,S. Haryana,0.16,LOW,0.3838,0.4055
+Maharashtra,Vidarbha,0.16,LOW,0.4176,0.4366
+Uttar Pradesh,W. UP,0.15,LOW,0.468,0.4799
+Andhra Pradesh,Coastal AP,0.15,LOW,0.5358,0.545
+Tamil Nadu,S. Tamil Nadu,0.14,LOW,0.5463,0.5494
+Manipur,Manipur,0.13,LOW,0.7012,0.7035
+Western Ghats,W. Ghats Forest,0.12,LOW,0.7194,0.7266
+Karnataka,S. Karnataka,0.12,LOW,0.6465,0.6469
+Mizoram,Mizoram,0.11,LOW,0.7508,0.7525
+Meghalaya,Meghalaya,0.11,LOW,0.7946,0.7986
+Andhra Pradesh,Rayalaseema,0.1,LOW,0.3534,0.3661
+Tripura,Tripura,0.09,LOW,0.728,0.7286
+Uttar Pradesh,E. UP,0.09,LOW,0.4387,0.4417
+Punjab,Punjab,0.09,LOW,0.5555,0.5643
+Odisha,W. Odisha,0.09,LOW,0.5404,0.5418
+Madhya Pradesh,Bundelkhand,0.09,LOW,0.4044,0.407
+Chhattisgarh,Chhattisgarh,0.08,LOW,0.582,0.5957
+Odisha,Coastal Odisha,0.08,LOW,0.6138,0.6146
+Gujarat,Saurashtra,0.08,LOW,0.2454,0.244
+Arunachal Pradesh,Arunachal,0.08,LOW,0.7745,0.7807
+Tamil Nadu,N. Tamil Nadu,0.07,LOW,0.4766,0.4754
+Rajasthan,W. Rajasthan,0.07,LOW,0.1406,0.1375
+Goa,Goa,0.07,LOW,0.7239,0.7183
+Assam,Assam,0.07,LOW,0.7207,0.7218
+Karnataka,N. Karnataka,0.07,LOW,0.3902,0.3931
+Bihar,S. Bihar,0.06,LOW,0.5105,0.5204
+Uttarakhand,Uttarakhand,0.06,LOW,0.5351,0.5417
+Delhi,NCR Delhi,0.05,LOW,0.2469,0.2494
+Madhya Pradesh,Malwa,0.05,LOW,0.4898,0.4975
+West Bengal,W. Bengal,0.05,LOW,0.6097,0.613
+Gujarat,N. Gujarat,0.04,LOW,0.3002,0.2961
+Sikkim,Sikkim,0.03,LOW,0.6478,0.6453
+Himachal Pradesh,HP Hills,0.0,LOW,0.5047,0.4992
+J&K / Ladakh,J&K,0.0,LOW,0.2579,0.249
+Nagaland,Nagaland,0.0,LOW,0.7287,0.7204
