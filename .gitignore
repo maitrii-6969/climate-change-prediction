@@ -32,4 +32,4 @@ data/ml_ready/
 *.h5
 fix*.py
 write*.py
-.streamlit/
+.streamlit/MY_GITHUB_TOKEN.txt 
