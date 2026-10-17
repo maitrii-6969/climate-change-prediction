@@ -33,3 +33,7 @@ data/ml_ready/
 fix*.py
 write*.py
 .streamlit/MY_GITHUB_TOKEN.txt 
+*.nc
+*.tif
+*.pkl
+datasets/
