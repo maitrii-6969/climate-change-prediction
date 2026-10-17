@@ -1,0 +1,5 @@
+model,split,RMSE,MAE,R2
+LightGBM,val,103.12,54.15,0.7511
+LightGBM,test,115.96,54.44,0.7108
+XGBoost,val,96.35,51.38,0.7827
+XGBoost,test,104.92,51.55,0.7632

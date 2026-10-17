@@ -1,0 +1,17 @@
+target,model,split,RMSE,MAE,R2
+Rainfall (mm),Seasonal naive,val,136.823,77.247,0.562
+Rainfall (mm),Climatology,val,87.272,48.104,0.822
+Rainfall (mm),Random Forest,val,89.782,49.752,0.811
+Rainfall (mm),LightGBM,val,96.321,51.992,0.783
+Rainfall (mm),Seasonal naive,test,111.002,62.883,0.735
+Rainfall (mm),Climatology,test,96.941,49.176,0.798
+Rainfall (mm),Random Forest,test,102.173,51.213,0.775
+Rainfall (mm),LightGBM,test,111.87,52.835,0.731
+Skin temp (C),Seasonal naive,val,1.464,1.114,0.915
+Skin temp (C),Climatology,val,1.014,0.792,0.959
+Skin temp (C),Random Forest,val,1.067,0.846,0.955
+Skin temp (C),LightGBM,val,1.001,0.782,0.96
+Skin temp (C),Seasonal naive,test,1.549,1.185,0.885
+Skin temp (C),Climatology,test,1.095,0.817,0.943
+Skin temp (C),Random Forest,test,1.005,0.784,0.952
+Skin temp (C),LightGBM,test,0.949,0.727,0.957

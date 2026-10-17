@@ -1,0 +1,7 @@
+model,split,RMSE,MAE,R2
+Seasonal naive (same month last year),val,136.82,77.25,0.5618
+Climatology (train-year monthly mean),val,92.01,50.14,0.8018
+Seasonal naive (same month last year),test,111.0,62.88,0.735
+Climatology (train-year monthly mean),test,101.76,50.07,0.7773
+Random Forest,val,88.46,48.99,0.8168
+Random Forest,test,100.02,50.18,0.7848
