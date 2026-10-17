@@ -1,0 +1,11 @@
+model,split,RMSE,MAE,R2
+Seasonal naive,val,0.0377,0.0269,0.7689
+Climatology,val,0.0303,0.0239,0.8504
+Random Forest,val,0.0259,0.0188,0.8904
+XGBoost,val,0.0241,0.0183,0.9051
+LightGBM,val,0.0237,0.0175,0.9085
+Seasonal naive,test,0.0423,0.0335,0.6592
+Climatology,test,0.0395,0.0294,0.7036
+Random Forest,test,0.0328,0.0237,0.7949
+XGBoost,test,0.0306,0.0226,0.8223
+LightGBM,test,0.0314,0.0227,0.8128
