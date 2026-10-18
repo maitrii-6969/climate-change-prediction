@@ -9,6 +9,8 @@ import rain_common as rc
 mod = pd.read_csv(os.path.join(rc.OUT_DIR, "modis_city_monthly.csv"), parse_dates=["date"])
 imd = rc.load_monthly()
 m = mod.merge(imd, on=["city", "date"], how="inner", validate="one_to_one")
+m = m.sort_values(["city", "date"]).reset_index(drop=True)
+m["lst_c"] = m.groupby("city")["lst_c"].transform(lambda s: s.interpolate(limit=2, limit_direction="both"))
 print("joined city-months:", len(m), "(expected 1200)")
 
 out = []
