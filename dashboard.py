@@ -11,6 +11,7 @@ st.set_page_config(page_title="Climate impact prediction", layout="wide")
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MAPS = os.path.join(ROOT, "outputs", "maps")
 DATA = os.path.join(ROOT, "data", "dashboard")
+RESULTS = os.path.join(ROOT, "outputs", "results")
 
 INK = "#1f2933"
 PALETTE = ["#2f6b5e", "#b9852c", "#9b4a3a", "#4a6fa5", "#7a5c8e",
@@ -137,8 +138,8 @@ def page_overview():
     st.dataframe(
         pd.DataFrame([
             ["IMD gridded rainfall", "In use", "Daily, 0.25 degree, 2015-2024"],
-            ["ERA5 reanalysis", "Needs re-download", "12 months missing from our file"],
-            ["MODIS NDVI / EVI / LST", "Downloading", "5 km monthly composites via Earth Engine"],
+            ["ERA5 reanalysis", "In use", "Monthly, 2015-2024, all 120 months; skin temperature used as a land surface temperature proxy"],
+            ["MODIS NDVI / EVI / LST", "In use", "5 km monthly composites via Earth Engine, 360 files, 2015-2024"],
             ["ISRO Resourcesat / INSAT-3DR", "Requested", "Waiting on NRSC and MOSDAC"],
         ], columns=["Source", "Status", "Note"]),
         hide_index=True,
@@ -210,26 +211,114 @@ def page_rainfall():
                        file_name="imd_city_monthly.csv")
 
 
+def load_results():
+    """Real-data test scores written by scripts 15/16 (ERA5 + IMD) and 18 (MODIS)."""
+    frames = []
+    f = os.path.join(RESULTS, "modis_ndvi_models.csv")
+    if os.path.exists(f):
+        d = pd.read_csv(f)
+        d.insert(0, "target", "Vegetation (NDVI, MODIS)")
+        frames.append(d)
+    f = os.path.join(RESULTS, "era5_imd_models.csv")
+    if os.path.exists(f):
+        d = pd.read_csv(f)
+        d["target"] = d["target"].replace({
+            "Skin temp (C)": "Skin temperature (ERA5)",
+            "Rainfall (mm)": "Rainfall (IMD)"})
+        frames.append(d)
+    if not frames:
+        return None
+    return pd.concat(frames, ignore_index=True)
+
+
 def page_models():
     st.title("Model results")
-    st.write("Scores are on the held-out test period, 2023-2024.")
-
-    st.dataframe(
-        pd.DataFrame([
-            ["XGBoost", "Synthetic NDVI", "0.0441", "0.0338", "0.9709", "Pipeline test only"],
-            ["CNN-LSTM", "Synthetic NDVI", "0.0442", "0.0325", "0.9722", "Pipeline test only"],
-            ["XGBoost", "ERA5 skin temperature", "1.216 C", "0.917 C", "0.9277", "Re-running"],
-            ["XGBoost", "ERA5 + IMD rainfall", "1.242 C", "0.923 C", "0.9246", "Re-running"],
-        ], columns=["Model", "Data", "RMSE", "MAE", "R2", "Status"]),
-        hide_index=True,
+    st.write(
+        "One-month-ahead predictions for 10 Indian cities (Mumbai, Delhi, Chennai, "
+        "Kolkata, Bangalore, Hyderabad, Jaipur, Ahmedabad, Bhopal, Nagpur). "
+        "Scores are on the held-out test period, 2023-2024. Train 2015-2021, "
+        "validation 2022, no shuffling."
     )
+
+    res = load_results()
+    if res is None:
+        st.info("Result files not found in outputs/results. Run scripts 15/16 and 18, then push the CSVs.")
+    else:
+        test = res[res["split"] == "test"].copy()
+        order = {"Seasonal naive": 0, "Climatology": 1, "Random Forest": 2, "XGBoost": 3, "LightGBM": 4}
+        units = {"Vegetation (NDVI, MODIS)": "", "Skin temperature (ERA5)": " C", "Rainfall (IMD)": " mm"}
+        rows = []
+        for target in ["Vegetation (NDVI, MODIS)", "Skin temperature (ERA5)", "Rainfall (IMD)"]:
+            t = test[test["target"] == target].copy()
+            if t.empty:
+                continue
+            t["o"] = t["model"].map(order)
+            t = t.sort_values("o")
+            clim = float(t.loc[t["model"] == "Climatology", "RMSE"].iloc[0])
+            best = t["RMSE"].min()
+            for _, r in t.iterrows():
+                if r["model"] in ("Seasonal naive", "Climatology"):
+                    gain = "baseline"
+                else:
+                    g = (clim - r["RMSE"]) / clim * 100
+                    gain = f"{g:+.1f}%"
+                    if r["RMSE"] == best and g > 0:
+                        gain += " (best)"
+                dp = 4 if target.startswith("Vegetation") else 3
+                rows.append([target, r["model"], f"{r['RMSE']:.{dp}f}{units[target]}",
+                             f"{r['MAE']:.{dp}f}{units[target]}", f"{r['R2']:.3f}", gain])
+        st.dataframe(
+            pd.DataFrame(rows, columns=["Target", "Model", "RMSE", "MAE", "R2", "RMSE vs climatology"]),
+            hide_index=True, height=35 * (len(rows) + 1) + 3,
+        )
+        st.caption(
+            "Climatology = the average for that city and calendar month in the training years. "
+            "Seasonal naive = the value from the same month a year earlier. "
+            "A model only adds something if it beats climatology."
+        )
+
+    st.subheader("What the results say")
     st.markdown(
-        "- The synthetic rows only prove the code runs end to end. We generated that data, so the scores say nothing about real climate.\n"
-        "- The real-data rows are being re-run. Our ERA5 file is missing 12 months and the two datasets were joined by position instead of by date.\n"
-        "- Still to add: a seasonal-naive baseline (same month last year) to show what the models gain over seasonality alone."
+        "- **Vegetation (NDVI):** all three models beat both baselines, on the validation year and on the test years. "
+        "XGBoost's error is about 20% below climatology. Most of the signal is still the seasonal average; "
+        "the gain comes from recent NDVI and EVI values carrying over month to month.\n"
+        "- **Skin temperature:** a modest gain over climatology (LightGBM about 0.95 C against 1.10 C RMSE, roughly 13% lower error). "
+        "This is ERA5 reanalysis skin temperature, a stand-in for satellite land surface temperature.\n"
+        "- **Rainfall:** the models do not beat climatology. One month ahead, rainfall here is mostly seasonality, "
+        "and last month's values add little.\n"
+        "- The three models are close to each other, so the ranking between them should not be over-read."
     )
 
-    with st.expander("Plots"):
+    cv_path = os.path.join(RESULTS, "timeseries_cv.csv")
+    if os.path.exists(cv_path):
+        with st.expander("Rainfall cross-validation (5 expanding time-series folds)"):
+            cv = pd.read_csv(cv_path)
+            st.dataframe(cv, hide_index=True)
+            st.caption(f"Mean R2: Random Forest {cv['RF_R2'].mean():.3f}, seasonal naive {cv['naive_R2'].mean():.3f}.")
+
+    an_path = os.path.join(RESULTS, "rainfall_anomalies.csv")
+    if os.path.exists(an_path):
+        with st.expander("Unusual rainfall months (Isolation Forest)"):
+            an = pd.read_csv(an_path, parse_dates=["date"])
+            flagged = an[(an["flag"]) & (an["date"].dt.year >= 2023)].sort_values("score", ascending=False)
+            st.write(f"{int(an['flag'].sum())} of {len(an)} city-months flagged overall; "
+                     f"{len(flagged)} of them in the 2023-2024 test years.")
+            show = flagged.head(15)[["city", "date", "rain_mm", "anom", "kind"]].copy()
+            show["date"] = show["date"].dt.strftime("%b %Y")
+            show.columns = ["City", "Month", "Rain (mm)", "Anomaly (mm)", "Type"]
+            st.dataframe(show.round(1), hide_index=True)
+            st.caption("Anomaly = rainfall minus the training-year average for that city and month.")
+
+    with st.expander("Pipeline test on synthetic data (not real results)"):
+        st.write("These two rows only show that the code runs end to end. We generated that data ourselves, "
+                 "so the scores say nothing about real climate.")
+        st.dataframe(
+            pd.DataFrame([
+                ["XGBoost", "Synthetic NDVI", "0.0441", "0.0338", "0.9709"],
+                ["CNN-LSTM", "Synthetic NDVI", "0.0442", "0.0325", "0.9722"],
+            ], columns=["Model", "Data", "RMSE", "MAE", "R2"]),
+            hide_index=True,
+        )
         show_image("XGBoost, actual vs predicted (synthetic)", "xgboost_predictions.png")
         show_image("CNN-LSTM training loss (synthetic)", "cnn_lstm_loss_curve.png")
         show_image("CNN-LSTM, actual vs predicted (synthetic)", "cnn_lstm_predictions.png")
@@ -281,14 +370,17 @@ def page_about():
 **Team:** Maitreya Rajesh Tarmale (230929306), Raghav Bandral
 
 **Method**
-- Features: lagged and rolling temperature and rainfall, cyclical month encoding
-- Models: XGBoost baseline, CNN-LSTM
+- Features: lagged and rolling vegetation, temperature and rainfall values, cyclical month encoding
+- Models: seasonal-naive and climatology baselines, Random Forest, XGBoost, LightGBM; Isolation Forest for unusual rainfall months
+- Data: IMD gridded rainfall, ERA5 reanalysis, MODIS NDVI / EVI / LST
 - Validation: chronological split, no shuffling
 
 **Known limitations**
 - ISRO data has been requested but not received, so nothing here is ISRO-derived yet
-- The drought map and the CNN-LSTM results use synthetic data
-- ERA5-based results are being re-run after a date-alignment fix
+- The drought map and the CNN-LSTM results still use synthetic data; the CNN-LSTM has not been run on real data yet
+- Results cover 10 cities, one month ahead, from a single chronological split
+- Rainfall models do not beat the seasonal average
+- ERA5 skin temperature is reanalysis, not satellite land surface temperature
 
 **Code:** github.com/maitrii-6969/climate-change-prediction
 """
